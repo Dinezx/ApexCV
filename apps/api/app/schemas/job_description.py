@@ -32,4 +32,13 @@ class JobDescriptionMatchResponse(BaseModel):
     missing_keywords: list[str]
     summary: str
     suggestions: list[str]
-    jobs: list[dict] = []
+    jobs: list[dict] = []
+
+
+class JobDescriptionGenerateRequest(BaseModel):
+    title: str = Field(min_length=3, max_length=200)
+
+
+class JobDescriptionGenerateResponse(BaseModel):
+    content: str
+

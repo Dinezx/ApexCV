@@ -15,9 +15,10 @@ import {
   MapPin, 
   DollarSign, 
   Check,
-  History
+  History,
+  Brain
 } from 'lucide-react';
-import { getDashboardOverview, listJobDescriptions, listResumes, matchResumeToJobDescription, uploadResume } from '@/lib/api';
+import { getDashboardOverview, listJobDescriptions, listResumes, matchResumeToJobDescription, uploadResume, generateJobDescription } from '@/lib/api';
 import type { JobDescriptionMatchResult, JobDescriptionRecord, ResumeRecord } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,6 +96,33 @@ export default function AnalysisPage() {
   const [uploadNotice, setUploadNotice] = useState<string>('Upload a resume to start a guided match analysis.');
   const [checkedSuggestions, setCheckedSuggestions] = useState<Record<string, boolean>>({});
   const [showHistory, setShowHistory] = useState(false);
+  const [generatingJd, setGeneratingJd] = useState(false);
+
+  const handleGenerateJd = async (titleToUse?: string) => {
+    const targetTitle = titleToUse || jobTitle;
+    if (!targetTitle || targetTitle.trim().length < 3) return;
+    setGeneratingJd(true);
+    try {
+      const content = await generateJobDescription(targetTitle);
+      setJobContent(content);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setGeneratingJd(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!jobTitle || jobTitle.trim().length < 3 || jobTitle === demoJobDescription.title) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (!jobContent || jobContent === demoJobDescription.content) {
+        void handleGenerateJd(jobTitle);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [jobTitle]);
 
   const overviewQuery = useQuery({ queryKey: ['dashboard-overview'], queryFn: getDashboardOverview, retry: false });
   const resumesQuery = useQuery({ queryKey: ['resumes'], queryFn: listResumes, retry: false });
@@ -301,6 +329,14 @@ export default function AnalysisPage() {
                     setJobContent(demoJobDescription.content);
                   }}>
                     Load Demo JD
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    disabled={generatingJd || !jobTitle || jobTitle.trim().length < 3}
+                    onClick={() => handleGenerateJd()}
+                  >
+                    <Brain size={16} className={generatingJd ? 'animate-pulse' : ''} />
+                    {generatingJd ? 'Generating...' : 'AI Generate JD'}
                   </Button>
                 </div>
               </Card>

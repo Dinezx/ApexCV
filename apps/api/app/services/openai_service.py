@@ -221,7 +221,26 @@ Job Description Text:
         except Exception:
             pass
         
-        return None
+    async def generate_job_description(self, target_role: str) -> str:
+        if not self.client:
+            return f"We are looking for a skilled {target_role} with experience in design, development, and team collaboration. The ideal candidate owns deployment, reliability, and modern software engineering practices."
+
+        prompt = f"Generate a realistic, ATS-friendly, professional job description for the target role: \"{target_role}\". Include key responsibilities, required skills (programming languages, libraries, databases), and certifications/education if appropriate. Keep it concise, around 100-150 words. Do not use generic filler text."
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert technical recruiter. Write a clear, concise, and realistic job description. Return ONLY the job description text with no introductory or concluding remarks.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.7,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception:
+            return f"We are looking for a skilled {target_role} with experience in design, development, and team collaboration. The ideal candidate owns deployment, reliability, and modern software engineering practices."
 
 
 openai_service = OpenAIService()

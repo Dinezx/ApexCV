@@ -9,10 +9,22 @@ from app.schemas.job_description import (
     JobDescriptionMatchRequest,
     JobDescriptionMatchResponse,
     JobDescriptionResponse,
+    JobDescriptionGenerateRequest,
+    JobDescriptionGenerateResponse,
 )
 from app.services.job_description_service import job_description_service
+from app.services.openai_service import openai_service
 
 router = APIRouter()
+
+
+@router.post("/generate", response_model=JobDescriptionGenerateResponse)
+async def generate_job_description(
+    payload: JobDescriptionGenerateRequest,
+    user: User = Depends(get_current_user),
+) -> JobDescriptionGenerateResponse:
+    content = await openai_service.generate_job_description(payload.title)
+    return JobDescriptionGenerateResponse(content=content)
 
 
 @router.post("", response_model=JobDescriptionResponse)

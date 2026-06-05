@@ -263,6 +263,15 @@ export function compareResumes(baseResumeId: number, targetResumeId: number): Pr
 }
 
 
+export async function generateJobDescription(title: string): Promise<string> {
+  const response = await fetchJson<{ content: string }>('/api/v1/job-descriptions/generate', {
+    method: 'POST',
+    body: JSON.stringify({ title }),
+  });
+  return response.content;
+}
+
+
 export function listJobDescriptions(): Promise<JobDescriptionRecord[]> {
   if (!readToken()) {
     return Promise.resolve([]);
