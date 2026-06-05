@@ -16,7 +16,7 @@ class OpenAIService:
         if not api_key.startswith("sk-"):
             self.client = AsyncOpenAI(
                 api_key=api_key,
-                base_url="https://generativelanguage.googleapis.com/v1beta/"
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
             )
             # Default model to gemini-1.5-flash if set to default openai placeholder
             self.model = "gemini-1.5-flash" if settings.openai_model == "gpt-4.1-mini" else settings.openai_model
@@ -225,20 +225,21 @@ Job Description Text:
         if not self.client:
             return f"We are looking for a skilled {target_role} with experience in design, development, and team collaboration. The ideal candidate owns deployment, reliability, and modern software engineering practices."
 
-        prompt = f"Generate a realistic, ATS-friendly, professional job description for the target role: \"{target_role}\". Include key responsibilities, required skills (programming languages, libraries, databases), and certifications/education if appropriate. Keep it concise, around 100-150 words. Do not use generic filler text."
+        prompt = f"Generate a realistic, ATS-friendly, professional job description for the target role: \"{target_role}\". Include key responsibilities, required skills, and qualifications. Keep it concise, around 100-150 words. Do not use generic filler text."
         try:
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert technical recruiter. Write a clear, concise, and realistic job description. Return ONLY the job description text with no introductory or concluding remarks.",
+                        "content": "You are an expert technical recruiter. Write a clear, concise, and realistic job description. Return ONLY the job description text with no introductory or concluding remarks. DO NOT use any markdown formatting, asterisks (*), or bold formatting (**) in the response.",
                     },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.7,
             )
-            return response.choices[0].message.content.strip()
+            content = response.choices[0].message.content.strip()
+            return content.replace("**", "").replace("*", "")
         except Exception:
             return f"We are looking for a skilled {target_role} with experience in design, development, and team collaboration. The ideal candidate owns deployment, reliability, and modern software engineering practices."
 

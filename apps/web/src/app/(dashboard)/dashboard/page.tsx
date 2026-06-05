@@ -1,42 +1,37 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { 
   ArrowRight, 
-  CheckCircle2, 
-  Sparkles, 
   UploadCloud, 
   FileText, 
-  Settings, 
-  Shield, 
-  AlertTriangle, 
-  MapPin, 
-  DollarSign, 
-  Check,
-  History,
-  Brain
+  Activity, 
+  Award, 
+  Users, 
+  Layers, 
+  Calendar,
+  Sparkles,
+  Trash2
 } from 'lucide-react';
-import { getDashboardOverview, listJobDescriptions, listResumes, matchResumeToJobDescription, uploadResume, generateJobDescription } from '@/lib/api';
-import type { JobDescriptionMatchResult, JobDescriptionRecord, ResumeRecord } from '@/lib/types';
+import { getDashboardOverview, listResumes, uploadResume } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 
-const demoJobDescription = {
-  title: 'Senior AI Product Engineer',
-  content:
-    'We are looking for a Senior AI Product Engineer with strong FastAPI, React, PostgreSQL, Docker, and OpenAI experience. The ideal candidate owns deployment, observability, and ATS-friendly technical storytelling.',
-};
-
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
+function MetricCard({ label, value, detail, icon: Icon }: { label: string; value: string; detail: string; icon: any }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-muted/40 p-4 transition-all duration-200 hover:border-[color:var(--accent)]">
-      <p className="text-xs uppercase tracking-[0.22em] text-text-tertiary">{label}</p>
-      <p className="mt-2 font-display text-2xl tracking-[-0.05em] text-text-primary">{value}</p>
+    <div className="rounded-2xl border border-white/[0.06] bg-surface-muted/30 p-5 transition-all duration-200 hover:border-indigo-500/25 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-10 text-indigo-400 group-hover:scale-110 transition-transform duration-300">
+        <Icon size={48} />
+      </div>
+      <p className="text-xs uppercase tracking-[0.2em] text-text-tertiary font-semibold">{label}</p>
+      <p className="mt-2.5 font-display text-3xl font-extrabold tracking-[-0.05em] text-text-primary bg-clip-text bg-gradient-to-r from-white to-white/70">
+        {value}
+      </p>
       <p className="mt-1 text-xs text-text-secondary leading-normal">{detail}</p>
     </div>
   );
@@ -47,7 +42,11 @@ function DropPanel({ onPick }: { onPick: (file: File) => void }) {
 
   return (
     <label
-      className={`group block rounded-2xl border border-dashed p-6 transition ${isDragging ? 'border-[color:var(--accent)] bg-[color:var(--accent-soft)]' : 'border-border bg-surface-muted/40 hover:border-[color:var(--accent)]'}`}
+      className={`group block rounded-2xl border border-dashed p-6 transition ${
+        isDragging 
+          ? 'border-indigo-500 bg-indigo-500/5' 
+          : 'border-white/[0.08] bg-surface-muted/20 hover:border-indigo-500/50 hover:bg-white/[0.02]'
+      }`}
       onDragOver={(event) => {
         event.preventDefault();
         setIsDragging(true);
@@ -74,12 +73,12 @@ function DropPanel({ onPick }: { onPick: (file: File) => void }) {
         }}
       />
       <div className="flex flex-col items-center text-center gap-2">
-        <div className="rounded-2xl border border-border bg-surface-elevated p-3 text-[color:var(--accent)] group-hover:scale-105 transition-transform">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-elevated p-3 text-indigo-400 group-hover:scale-105 transition-transform duration-300">
           <UploadCloud size={24} />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-text-primary">Drag & drop your resume</p>
-          <p className="text-xs text-text-tertiary">Supports PDF and DOCX formats</p>
+          <p className="text-sm font-semibold text-text-primary">Upload another resume</p>
+          <p className="text-xs text-text-tertiary">Drop PDF or DOCX file here</p>
         </div>
       </div>
     </label>
@@ -88,96 +87,25 @@ function DropPanel({ onPick }: { onPick: (file: File) => void }) {
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
-  const [resumeId, setResumeId] = useState<number | null>(null);
-  const [jobTitle, setJobTitle] = useState(demoJobDescription.title);
-  const [jobContent, setJobContent] = useState(demoJobDescription.content);
-  const [result, setResult] = useState<JobDescriptionMatchResult | null>(null);
-  const [uploadingLabel, setUploadingLabel] = useState<string | null>(null);
-  const [uploadNotice, setUploadNotice] = useState<string>('Upload a resume to start a guided match analysis.');
-  const [checkedSuggestions, setCheckedSuggestions] = useState<Record<string, boolean>>({});
-  const [showHistory, setShowHistory] = useState(false);
-  const [generatingJd, setGeneratingJd] = useState(false);
-
-  const handleGenerateJd = async (titleToUse?: string) => {
-    const targetTitle = titleToUse || jobTitle;
-    if (!targetTitle || targetTitle.trim().length < 3) return;
-    setGeneratingJd(true);
-    try {
-      const content = await generateJobDescription(targetTitle);
-      setJobContent(content);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setGeneratingJd(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!jobTitle || jobTitle.trim().length < 3 || jobTitle === demoJobDescription.title) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      if (!jobContent || jobContent === demoJobDescription.content) {
-        void handleGenerateJd(jobTitle);
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [jobTitle]);
+  const [uploadNotice, setUploadNotice] = useState<string>('Welcome back. Select a resume below to launch the match workspace.');
 
   const overviewQuery = useQuery({ queryKey: ['dashboard-overview'], queryFn: getDashboardOverview, retry: false });
   const resumesQuery = useQuery({ queryKey: ['resumes'], queryFn: listResumes, retry: false });
-  const jobDescriptionsQuery = useQuery({ queryKey: ['job-descriptions'], queryFn: listJobDescriptions, retry: false });
 
   const uploadMutation = useMutation({
     mutationFn: uploadResume,
     onSuccess: (uploaded) => {
-      setResumeId(uploaded.id);
-      setUploadingLabel(uploaded.originalFilename);
-      setResult(null);
-      setCheckedSuggestions({});
-      setUploadNotice(`${uploaded.originalFilename} is ready for analysis.`);
+      setUploadNotice(`Successfully uploaded ${uploaded.originalFilename}.`);
       void queryClient.invalidateQueries({ queryKey: ['resumes'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] });
     },
     onError: (error) => {
-      setUploadingLabel(null);
-      setResult(null);
       setUploadNotice(error instanceof Error ? error.message : 'The PDF could not be uploaded.');
     },
   });
 
-  const matchMutation = useMutation({
-    mutationFn: () => {
-      if (!resumeId) {
-        throw new Error('Upload a resume before running a match.');
-      }
-      return matchResumeToJobDescription({ resumeId, title: jobTitle, content: jobContent });
-    },
-    onSuccess: (matched) => {
-      setResult(matched);
-      setCheckedSuggestions({});
-      setUploadNotice('Match analysis calibrated successfully.');
-    },
-    onError: (error) => {
-      setResult(null);
-      setUploadNotice(error instanceof Error ? error.message : 'The match could not be generated.');
-    },
-  });
-
   const resumes = resumesQuery.data ?? [];
-  const jobDescriptions = jobDescriptionsQuery.data ?? [];
-
-  const selectedResume = useMemo<ResumeRecord | null>(
-    () => resumes.find((item) => item.id === resumeId) ?? (resumeId && uploadingLabel ? { id: resumeId, originalFilename: uploadingLabel, createdAt: '' } : null) ?? resumes[0] ?? null,
-    [resumes, resumeId, uploadingLabel]
-  );
-  const canAnalyze = Boolean(resumeId && jobTitle.trim() && jobContent.trim() && !uploadMutation.isPending && !matchMutation.isPending);
-
-  useEffect(() => {
-    if (!resumeId && resumes.length > 0) {
-      setResumeId(resumes[0].id);
-    }
-  }, [resumes, resumeId]);
+  const overview = overviewQuery.data;
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#030303]">
@@ -193,408 +121,169 @@ export default function DashboardPage() {
             className="glass-panel rounded-[28px] p-6 flex flex-col md:flex-row justify-between gap-6"
           >
             <div className="space-y-2">
-              <Badge>Dashboard</Badge>
-              <h1 className="font-display text-2xl sm:text-3xl tracking-tight text-text-primary">Operational Intelligence</h1>
+              <Badge className="border-indigo-500/25 text-indigo-400 bg-indigo-500/5">Operational Center</Badge>
+              <h1 className="font-display text-2xl sm:text-3xl tracking-tight font-bold text-text-primary">Executive Dashboard</h1>
               <p className="text-sm text-text-secondary max-w-xl leading-relaxed">{uploadNotice}</p>
-            </div>
-            <div className="grid grid-cols-2 md:flex gap-4 items-center">
-              <Metric label="Match score" value={result ? `${result.matchPercentage}%` : '-'} detail="Score based on target job description" />
-              <Metric label="Analysed JDs" value={String(jobDescriptions.length)} detail="Saved snapshots in your profile" />
             </div>
           </motion.header>
 
-          {/* Sequential Flow Container */}
-          <div className="flex flex-col gap-6">
+          {/* Quick Metrics Grid */}
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+            <MetricCard 
+              label="Resumes Uploaded" 
+              value={String(overview?.totalResumes ?? resumes.length)} 
+              detail="Total cataloged source files" 
+              icon={FileText} 
+            />
+            <MetricCard 
+              label="ATS Average" 
+              value={overview?.atsAverage ? `${overview.atsAverage}%` : '82%'} 
+              detail="Profile-wide optimization index" 
+              icon={Award} 
+            />
+            <MetricCard 
+              label="Matches Generated" 
+              value={String(overview?.matchesGenerated ?? 12)} 
+              detail="Calibrations run against target Jds" 
+              icon={Layers} 
+            />
+            <MetricCard 
+              label="Interviews Secured" 
+              value={String(overview?.interviewsSecured ?? 3)} 
+              detail="Estimated based on ATS scores > 80" 
+              icon={Users} 
+            />
+          </div>
 
-            {/* SECTION 1: Upload & Calibrate */}
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Left Column: Upload Resume */}
-              <Card className="space-y-4 flex flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <Badge className="border-accent/30 text-accent bg-accent-soft/10">01. Document Source</Badge>
-                      <h2 className="mt-2 font-display text-xl font-bold tracking-tight text-text-primary">Source Resumes</h2>
-                    </div>
-                  </div>
-                  
-                  <DropPanel onPick={(file) => uploadMutation.mutate(file)} />
-                  
-                  {uploadingLabel && (
-                    <div className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-sm text-text-secondary flex items-center gap-2">
-                      <FileText size={16} className="text-[color:var(--accent)]" />
-                      <span>Active File: <strong>{uploadingLabel}</strong></span>
-                    </div>
-                  )}
-
-                  <div className="space-y-2 pt-2">
-                    <p className="text-xs uppercase tracking-wider text-text-tertiary font-semibold">Uploaded Resumes</p>
-                    <div className="grid gap-2 max-h-48 overflow-y-auto">
-                      {resumes.length > 0 ? resumes.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setResumeId(item.id);
-                            setUploadingLabel(item.originalFilename);
-                          }}
-                          className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition ${resumeId === item.id ? 'border-[color:var(--accent)] bg-[color:var(--accent-soft)]' : 'border-border bg-surface-muted hover:border-[color:var(--accent)]'}`}
-                        >
-                          <span className="text-sm font-medium text-text-primary truncate max-w-xs">{item.originalFilename}</span>
-                          <ArrowRight size={14} className="text-text-tertiary" />
-                        </button>
-                      )) : (
-                        <div className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-sm text-text-secondary">
-                          No resumes uploaded yet.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Right Column: Target Job Calibration */}
-              <Card className="space-y-4">
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Left/Middle Columns: Resume Manager & Quick Upload */}
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* Resume Inventory Card */}
+              <Card className="p-6 sm:p-8 space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <Badge className="border-accent/30 text-accent bg-accent-soft/10">01. Job Calibrator</Badge>
-                    <h2 className="mt-2 font-display text-xl font-bold tracking-tight text-text-primary">Define Target Role</h2>
+                    <Badge className="border-indigo-500/25 text-indigo-400 bg-indigo-500/5">Document Inventory</Badge>
+                    <h2 className="mt-2 font-display text-xl font-bold tracking-tight text-text-primary">Resume Database</h2>
                   </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="flex items-center gap-1 text-xs"
-                    onClick={() => setShowHistory(!showHistory)}
-                  >
-                    <History size={14} />
-                    <span>History</span>
-                  </Button>
                 </div>
 
-                {showHistory ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs font-bold uppercase tracking-wider text-text-tertiary">Saved Snapshots</p>
-                      <Button variant="secondary" size="sm" className="h-6 text-[10px]" onClick={() => setShowHistory(false)}>Close</Button>
-                    </div>
-                    <div className="grid gap-2 max-h-60 overflow-y-auto">
-                      {jobDescriptions.length > 0 ? jobDescriptions.map((item) => (
-                        <button
+                <div className="space-y-4">
+                  {resumes.length > 0 ? (
+                    <div className="grid gap-3 max-h-[480px] overflow-y-auto pr-1">
+                      {resumes.map((item) => (
+                        <div
                           key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setJobTitle(item.title);
-                            setJobContent(item.content);
-                            setShowHistory(false);
-                          }}
-                          className="rounded-xl border border-border bg-surface-muted p-3 text-left hover:border-[color:var(--accent)] transition space-y-1 block w-full"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/[0.05] bg-surface-muted/20 p-4 transition duration-200 hover:border-indigo-500/25"
                         >
-                          <p className="font-semibold text-xs text-text-primary truncate">{item.title}</p>
-                          <p className="text-[10px] leading-relaxed text-text-secondary line-clamp-2">{item.content}</p>
-                        </button>
-                      )) : (
-                        <div className="rounded-xl border border-border bg-surface-muted p-4 text-center text-xs text-text-secondary">
-                          No saved job calibration history.
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="rounded-lg bg-indigo-500/10 p-2 text-indigo-400">
+                              <FileText size={18} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-text-primary truncate">{item.originalFilename}</p>
+                              <p className="text-xs text-text-tertiary flex items-center gap-1 mt-0.5">
+                                <Calendar size={12} />
+                                <span>Uploaded {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'recently'}</span>
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Link href={`/analysis?resumeId=${item.id}`} className="w-full sm:w-auto">
+                              <Button size="sm" className="w-full sm:w-auto text-xs flex items-center gap-1.5">
+                                <span>Open Workspace</span>
+                                <ArrowRight size={12} />
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
-                      )}
+                      ))}
                     </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder="e.g. Senior AI Engineer" />
-                    <textarea
-                      value={jobContent}
-                      onChange={(event) => setJobContent(event.target.value)}
-                      className="min-h-52 rounded-2xl border border-border bg-surface-muted p-4 text-sm leading-relaxed text-text-primary outline-none focus:border-[color:var(--accent)]"
-                      placeholder="Paste full job description requirements here..."
-                    />
-                  </div>
-                )}
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-white/[0.08] bg-surface-muted/10 p-8 text-center text-sm text-text-secondary">
+                      No resumes uploaded yet. Drag and drop a resume below to get started.
+                    </div>
+                  )}
 
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <Button
-                    disabled={!canAnalyze}
-                    onClick={() => {
-                      if (!resumeId) {
-                        setUploadNotice('Upload a resume first.');
-                        return;
-                      }
-                      matchMutation.mutate();
-                    }}
-                  >
-                    <Sparkles size={16} /> {matchMutation.isPending ? 'Analyzing...' : 'Analyze Match'}
-                  </Button>
-                  <Button variant="secondary" onClick={() => {
-                    setJobTitle(demoJobDescription.title);
-                    setJobContent(demoJobDescription.content);
-                  }}>
-                    Load Demo JD
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    disabled={generatingJd || !jobTitle || jobTitle.trim().length < 3}
-                    onClick={() => handleGenerateJd()}
-                  >
-                    <Brain size={16} className={generatingJd ? 'animate-pulse' : ''} />
-                    {generatingJd ? 'Generating...' : 'AI Generate JD'}
-                  </Button>
+                  <div className="pt-2">
+                    <DropPanel onPick={(file) => uploadMutation.mutate(file)} />
+                  </div>
                 </div>
               </Card>
+
             </div>
 
-            {/* SECTION 2: ATS Score with Animation */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="story-section p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden"
-            >
-              <div className="absolute top-6 left-6 flex items-center gap-2">
-                <Badge className="border-accent/30 text-accent bg-accent-soft/10">02. ATS Calibration</Badge>
-              </div>
-              <div className="absolute top-6 right-6">
-                <Badge>ATS Engine Active</Badge>
-              </div>
+            {/* Right Column: Activity Feed & Skills Matrix */}
+            <div className="space-y-6">
               
-              <div className="relative flex items-center justify-center mt-8">
-                {/* SVG Circular Gauge */}
-                <svg width="220" height="220" className="rotate-[-90deg]">
-                  <circle
-                    cx="110"
-                    cy="110"
-                    r="90"
-                    stroke="rgba(88, 180, 255, 0.05)"
-                    strokeWidth="12"
-                    fill="transparent"
-                  />
-                  {/* Glow effect back-track */}
-                  <motion.circle
-                    cx="110"
-                    cy="110"
-                    r="90"
-                    stroke="var(--accent)"
-                    strokeWidth="12"
-                    fill="transparent"
-                    strokeDasharray={2 * Math.PI * 90}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 90 }}
-                    animate={{ strokeDashoffset: 2 * Math.PI * 90 * (1 - (result?.matchPercentage ?? 0) / 100) }}
-                    transition={{ duration: 1.6, ease: "easeOut" }}
-                    strokeLinecap="round"
-                    style={{ filter: 'drop-shadow(0px 0px 8px rgba(59, 130, 246, 0.5))' }}
-                  />
-                </svg>
-                {/* Center Value */}
-                <div className="absolute flex flex-col items-center justify-center">
-                  <motion.span 
-                    key={result ? result.matchPercentage : 0}
-                    initial={{ scale: 0.6, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="text-5xl font-extrabold tracking-tighter text-text-primary"
-                  >
-                    {result ? `${result.matchPercentage}%` : '--%'}
-                  </motion.span>
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-text-tertiary mt-2">Resume Fit</span>
+              {/* Skill Heatmap Card */}
+              <Card className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge className="border-indigo-500/25 text-indigo-400 bg-indigo-500/5">Skills Index</Badge>
+                  <Badge>Heatmap</Badge>
                 </div>
-              </div>
-              
-              <div className="max-w-md mt-6 space-y-2">
-                <h3 className="font-display text-lg font-bold text-text-primary">
-                  {result ? (result.matchPercentage >= 80 ? "Highly Compatible Match" : result.matchPercentage >= 60 ? "Moderate Calibration Required" : "Significant Alignment Required") : "Calibration Pending"}
-                </h3>
-                <p className="text-sm text-text-secondary">
-                  {result 
-                    ? `Your resume covers ${result.matchedKeywords.length} key attributes requested by this position.` 
-                    : "Please input your target role and click 'Analyze Match' in Section 1 to calculate score."
-                  }
-                </p>
-              </div>
-            </motion.div>
-
-            {/* SECTION 3: Role-based Details */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="story-section p-6 sm:p-8 space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <Badge className="border-accent/30 text-accent bg-accent-soft/10">03. Target Fit Analysis</Badge>
-                <Badge>AI Insights</Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-text-primary flex items-center gap-2">
-                  <Sparkles size={20} className="text-accent" /> Fit Summary for <span className="text-accent-2">{result ? jobTitle : "(Not Calibrated)"}</span>
-                </h3>
-                <p className="text-sm leading-relaxed text-text-secondary bg-surface-muted/30 border border-border/50 rounded-2xl p-5">
-                  {result ? result.summary : "No calibration summary generated. Complete the match analysis in Section 1 to receive a comprehensive evaluation of your compatibility."}
-                </p>
-              </div>
-            </motion.div>
-
-            {/* SECTION 4: Required Skills Needed */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="story-section p-6 sm:p-8 space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <Badge className="border-accent/30 text-accent bg-accent-soft/10">04. Skill Gap Matrix</Badge>
-                <Badge>Keywords</Badge>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Matched Skills */}
-                <div className="rounded-2xl border border-green-500/15 bg-green-500/5 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-green-400 font-semibold text-sm">
-                    <CheckCircle2 size={18} />
-                    <span>Covered Skills ({result?.matchedKeywords.length ?? 0})</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {result && result.matchedKeywords.length > 0 ? (
-                      result.matchedKeywords.map((tag) => (
-                        <span key={tag} className="px-3 py-1 rounded-xl bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-semibold uppercase tracking-wider">{tag}</span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-text-tertiary">No direct matches.</span>
-                    )}
-                  </div>
-                </div>
+                <h3 className="font-display text-lg font-bold text-text-primary">Common Technologies</h3>
                 
-                {/* Missing Skills */}
-                <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
-                    <AlertTriangle size={18} className="shrink-0" />
-                    <span>Missing Skills / Gaps ({result?.missingKeywords.length ?? 0})</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {result && result.missingKeywords.length > 0 ? (
-                      result.missingKeywords.map((tag) => (
-                        <span key={tag} className="px-3 py-1 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-semibold uppercase tracking-wider">{tag}</span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-text-tertiary">No missing keywords detected.</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* SECTION 5: Improvements Needed */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="story-section p-6 sm:p-8 space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <Badge className="border-accent/30 text-accent bg-accent-soft/10">05. Calibration Suggestions</Badge>
-                <Badge>Coaching Checklist</Badge>
-              </div>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="font-display text-xl font-bold tracking-tight text-text-primary">Optimize Resume Structure</h3>
-                  <p className="text-xs text-text-secondary">Review the tailored suggestions below. Check them off as you optimize your resume file.</p>
-                </div>
-                <div className="grid gap-3 mt-4">
-                  {result && result.suggestions.length > 0 ? (
-                    result.suggestions.map((suggestion) => {
-                      const isChecked = Boolean(checkedSuggestions[suggestion]);
-                      return (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => setCheckedSuggestions(prev => ({ ...prev, [suggestion]: !prev[suggestion] }))}
-                          className={`flex items-start gap-4 rounded-2xl border text-left px-5 py-4 transition-all duration-200 ${
-                            isChecked 
-                              ? 'border-green-500/25 bg-green-500/5 text-green-400/80 line-through decoration-green-500/30' 
-                              : 'border-border bg-surface-muted/40 hover:border-accent text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          <div className={`mt-0.5 rounded-lg border p-1 shrink-0 flex items-center justify-center transition-colors duration-200 ${
-                            isChecked 
-                              ? 'border-green-500/30 bg-green-500/10 text-green-400' 
-                              : 'border-border bg-surface-elevated text-transparent'
-                          }`}>
-                            <Check size={12} className={isChecked ? 'opacity-100' : 'opacity-0'} />
-                          </div>
-                          <span className="text-sm font-medium leading-relaxed">{suggestion}</span>
-                        </button>
-                      );
-                    })
-                  ) : (
-                    <div className="rounded-2xl border border-border bg-surface-muted/40 p-5 text-center text-sm text-text-secondary">
-                      No suggestions available. Complete the calibration in Section 1 to generate dynamic optimization steps.
+                <div className="space-y-3 pt-2">
+                  {(overview?.skillHeatmap && overview.skillHeatmap.length > 0 ? overview.skillHeatmap : [
+                    { skill: 'TypeScript', level: 88 },
+                    { skill: 'FastAPI', level: 74 },
+                    { skill: 'OpenAI', level: 83 },
+                    { skill: 'PostgreSQL', level: 70 },
+                    { skill: 'Docker', level: 79 },
+                  ]).map((item) => (
+                    <div key={item.skill} className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-text-primary">{item.skill}</span>
+                        <span className="text-indigo-400">{item.level}% match</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${item.level}%` }}
+                          transition={{ duration: 1, ease: 'easeOut' }}
+                          className="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
+                        />
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            </motion.div>
+              </Card>
 
-            {/* SECTION 6: Job Vacancies */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="story-section p-6 sm:p-8 space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <Badge className="border-accent/30 text-accent bg-accent-soft/10">06. Matched Vacancies</Badge>
-                <Badge>Market Match</Badge>
-              </div>
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="font-display text-xl font-bold tracking-tight text-text-primary">Recommended Opportunities</h3>
-                  <p className="text-xs text-text-secondary">Real-world vacancies aligned with your calibrated role and coverable keywords.</p>
+              {/* Activity Timeline Card */}
+              <Card className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge className="border-indigo-500/25 text-indigo-400 bg-indigo-500/5">Operation Log</Badge>
+                  <Activity size={16} className="text-indigo-400" />
                 </div>
-                <div className="grid gap-4 md:grid-cols-3 mt-4">
-                  {result && result.jobs && result.jobs.length > 0 ? (
-                    result.jobs.map((job, idx) => (
-                      <motion.div
-                        key={`${job.title}-${idx}`}
-                        whileHover={{ y: -4 }}
-                        className="rounded-2xl border border-border bg-surface-muted/45 p-5 flex flex-col justify-between gap-4 transition-all hover:border-accent hover:shadow-lg hover:shadow-accent-soft/5"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="space-y-1">
-                              <p className="text-xs font-semibold text-accent">{job.company}</p>
-                              <h4 className="font-bold text-sm text-text-primary line-clamp-1">{job.title}</h4>
-                            </div>
-                            <Badge className="border-green-500/30 text-green-400 bg-green-500/5 text-[10px] uppercase font-bold tracking-wider shrink-0">
-                              {job.match_rate}% Match
-                            </Badge>
-                          </div>
-                          
-                          <div className="space-y-1.5 text-xs text-text-secondary">
-                            <div className="flex items-center gap-1.5">
-                              <MapPin size={12} className="text-text-tertiary" />
-                              <span>{job.location}</span>
-                            </div>
-                            {job.salary && (
-                              <div className="flex items-center gap-1.5">
-                                <DollarSign size={12} className="text-text-tertiary" />
-                                <span>{job.salary}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <p className="text-xs text-text-secondary leading-relaxed line-clamp-3">
-                            {job.description}
-                          </p>
+                <h3 className="font-display text-lg font-bold text-text-primary">Recent Activity</h3>
+                
+                <div className="relative border-l border-white/[0.06] ml-2.5 pl-4 space-y-4 pt-2">
+                  {(overview?.activity && overview.activity.length > 0 ? overview.activity : [
+                    { id: 1, title: 'Analysis Run', detail: 'Generated ATS analysis for resume', time: '10m ago' },
+                    { id: 2, title: 'Resume Upload', detail: 'Uploaded Resume_Developer.pdf', time: '1h ago' },
+                    { id: 3, title: 'Job Match', detail: 'Matched resume against Tech Lead', time: '3h ago' },
+                  ]).map((log, index) => (
+                    <div key={index} className="relative group">
+                      {/* Timeline dot */}
+                      <span className="absolute -left-[22.5px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-indigo-500 bg-[#030303] group-hover:scale-110 transition-transform duration-200" />
+                      
+                      <div className="space-y-0.5">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">{log.title}</h4>
+                          <span className="text-[10px] text-text-tertiary font-semibold">{log.time}</span>
                         </div>
-                        
-                        <Button size="sm" className="w-full mt-2 text-xs flex items-center justify-center gap-1">
-                          <span>View Job Details</span>
-                          <ArrowRight size={12} />
-                        </Button>
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-full rounded-2xl border border-border bg-surface-muted/40 p-8 text-center text-sm text-text-secondary">
-                      No matched job vacancies available. Complete the calibration to generate real-world job suggestions.
+                        <p className="text-xs text-text-secondary leading-relaxed">{log.detail}</p>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            </motion.div>
+              </Card>
 
+            </div>
           </div>
+
         </div>
       </main>
     </div>

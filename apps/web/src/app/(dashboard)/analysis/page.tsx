@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -26,11 +27,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 
-const demoJobDescription = {
-  title: 'Senior AI Product Engineer',
-  content:
-    'We are looking for a Senior AI Product Engineer with strong FastAPI, React, PostgreSQL, Docker, and OpenAI experience. The ideal candidate owns deployment, observability, and ATS-friendly technical storytelling.',
-};
+
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
@@ -86,11 +83,13 @@ function DropPanel({ onPick }: { onPick: (file: File) => void }) {
   );
 }
 
-export default function AnalysisPage() {
+function AnalysisWorkspaceContent() {
+  const searchParams = useSearchParams();
+  const queryResumeId = searchParams.get('resumeId');
   const queryClient = useQueryClient();
   const [resumeId, setResumeId] = useState<number | null>(null);
-  const [jobTitle, setJobTitle] = useState(demoJobDescription.title);
-  const [jobContent, setJobContent] = useState(demoJobDescription.content);
+  const [jobTitle, setJobTitle] = useState('');
+  const [jobContent, setJobContent] = useState('');
   const [result, setResult] = useState<JobDescriptionMatchResult | null>(null);
   const [uploadingLabel, setUploadingLabel] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string>('Upload a resume to start a guided match analysis.');
@@ -113,11 +112,11 @@ export default function AnalysisPage() {
   };
 
   useEffect(() => {
-    if (!jobTitle || jobTitle.trim().length < 3 || jobTitle === demoJobDescription.title) {
+    if (!jobTitle || jobTitle.trim().length < 3) {
       return;
     }
     const timer = setTimeout(() => {
-      if (!jobContent || jobContent === demoJobDescription.content) {
+      if (!jobContent) {
         void handleGenerateJd(jobTitle);
       }
     }, 1500);
@@ -174,10 +173,22 @@ export default function AnalysisPage() {
   const canAnalyze = Boolean(resumeId && jobTitle.trim() && jobContent.trim() && !uploadMutation.isPending && !matchMutation.isPending);
 
   useEffect(() => {
+    if (queryResumeId) {
+      const parsed = parseInt(queryResumeId);
+      if (!isNaN(parsed)) {
+        setResumeId(parsed);
+        const selected = resumes.find(r => r.id === parsed);
+        if (selected) {
+          setUploadingLabel(selected.originalFilename);
+        }
+        return;
+      }
+    }
     if (!resumeId && resumes.length > 0) {
       setResumeId(resumes[0].id);
+      setUploadingLabel(resumes[0].originalFilename);
     }
-  }, [resumes, resumeId]);
+  }, [resumes, resumeId, queryResumeId]);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#030303]">
@@ -323,12 +334,6 @@ export default function AnalysisPage() {
                     }}
                   >
                     <Sparkles size={16} /> {matchMutation.isPending ? 'Analyzing...' : 'Analyze Match'}
-                  </Button>
-                  <Button variant="secondary" onClick={() => {
-                    setJobTitle(demoJobDescription.title);
-                    setJobContent(demoJobDescription.content);
-                  }}>
-                    Load Demo JD
                   </Button>
                   <Button
                     variant="secondary"
@@ -598,5 +603,13 @@ export default function AnalysisPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function AnalysisPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#030303] text-white flex items-center justify-center">Loading Workspace...</div>}>
+      <AnalysisWorkspaceContent />
+    </Suspense>
   );
 }
