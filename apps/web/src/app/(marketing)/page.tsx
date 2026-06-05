@@ -1,7 +1,7 @@
 'use client';
 
 import { LandingHeader } from '@/components/landing/landing-header';
-import { Hero } from '@/components/landing/hero';
+import { HeroGeometric } from '@/components/ui/shape-landing-hero';
 import { AtsDemo } from '@/components/landing/ats-demo';
 import { BentoGrid } from '@/components/landing/bento-grid';
 import { FloatingPreview } from '@/components/landing/floating-preview';
@@ -13,12 +13,17 @@ export default function MarketingPage() {
     <div className="relative min-h-screen flex flex-col bg-surface">
       <LandingHeader />
       
+      {/* Full-bleed geometric hero */}
+      <HeroGeometric
+        badge="AI Resume Intelligence"
+        title1="Transform Your Resume"
+        title2="Into Your Dream Career"
+      />
+
       <main className="flex-1 relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 page-grid opacity-20" />
         
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-          {/* Hero Section */}
-          <Hero />
 
           {/* ATS Scoring Demo & Preview Flow */}
           <motion.section
