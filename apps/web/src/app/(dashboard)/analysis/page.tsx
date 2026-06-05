@@ -152,7 +152,7 @@ export default function AnalysisPage() {
   }, [resumes, resumeId]);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-surface">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#030303]">
       <SidebarNav />
 
       <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">

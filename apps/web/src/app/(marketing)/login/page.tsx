@@ -3,11 +3,9 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, AlertCircle, CheckCircle2, Circle } from 'lucide-react';
 import { authenticate } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,62 +37,83 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-surface overflow-hidden justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Background grids */}
-      <div className="pointer-events-none absolute inset-0 page-grid opacity-20" />
-      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-[radial-gradient(circle,rgba(59,130,246,0.18),transparent_70%)] blur-3xl" />
+    <div className="relative min-h-screen flex items-center justify-center bg-[#030303] overflow-hidden px-4 py-12">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/[0.04] rounded-full blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/[0.03] rounded-full blur-[100px]" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 space-y-4">
-        {/* Navigation link back */}
-        <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors group mb-2">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
+        className="w-full max-w-md relative z-10 space-y-5"
+      >
+        <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-white/35 hover:text-white/60 transition-colors group">
           <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
           Back to homepage
         </Link>
-        
-        <Card className="w-full space-y-6">
-          <div className="space-y-2">
-            <div className="h-8 w-8 rounded-lg bg-[var(--accent)] flex items-center justify-center font-display text-white text-base font-bold shadow-sm shadow-[var(--accent)]/30 mb-2">
+
+        <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-8 sm:p-10 space-y-7 backdrop-blur-sm">
+          <div className="space-y-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-display text-white text-sm font-bold shadow-lg shadow-indigo-500/20">
               A
             </div>
-            <p className="text-xs uppercase tracking-[0.24em] text-text-tertiary">Welcome back</p>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">Sign in to workspace</h1>
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.06]">
+              <Circle className="h-1.5 w-1.5 fill-indigo-400" />
+              <span className="text-[10px] text-white/40 tracking-wider uppercase">Welcome Back</span>
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Sign in to workspace
+            </h1>
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-text-secondary">Email address</label>
-              <Input name="email" type="email" placeholder="you@example.com" required />
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-white/40">Email address</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
+              />
             </div>
-            
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-text-secondary">Password</label>
-              </div>
-              <Input name="password" type="password" placeholder="••••••••" required />
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-white/40">Password</label>
+              <input
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                required
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
+              />
             </div>
-
-            <Button className="w-full mt-2" type="submit" disabled={pending}>
+            <button
+              type="submit"
+              disabled={pending}
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:scale-[1.01] transition-all duration-300 disabled:opacity-40 disabled:pointer-events-none"
+            >
               {pending ? 'Signing in...' : 'Sign In'}
-            </Button>
+            </button>
           </form>
 
           {status && (
-            <div className={`rounded-xl border p-4 flex items-start gap-3 text-sm leading-normal ${isError ? 'border-red-500/20 bg-red-500/5 text-red-400' : 'border-green-500/20 bg-green-500/5 text-green-400'}`}>
-              {isError ? <AlertCircle size={18} className="shrink-0 mt-0.5" /> : <CheckCircle2 size={18} className="shrink-0 mt-0.5" />}
+            <div className={`rounded-xl border p-4 flex items-start gap-3 text-sm leading-normal ${isError ? 'border-red-500/15 bg-red-500/5 text-red-400/80' : 'border-emerald-500/15 bg-emerald-500/5 text-emerald-400/80'}`}>
+              {isError ? <AlertCircle size={16} className="shrink-0 mt-0.5" /> : <CheckCircle2 size={16} className="shrink-0 mt-0.5" />}
               <span>{status}</span>
             </div>
           )}
 
-          <div className="border-t border-border pt-4 text-center">
-            <p className="text-xs text-text-secondary">
+          <div className="border-t border-white/[0.06] pt-5 text-center">
+            <p className="text-xs text-white/30">
               Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-[color:var(--accent)] hover:underline font-medium">
+              <Link href="/signup" className="text-indigo-400/80 hover:text-indigo-400 font-medium transition-colors">
                 Create one free
               </Link>
             </p>
           </div>
-        </Card>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

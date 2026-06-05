@@ -11,7 +11,7 @@ export function Toggle({ className, pressed, ...props }: ToggleProps) {
     <button
       aria-pressed={pressed}
       className={cn(
-        'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-primary transition-all hover:border-[color:var(--accent)]',
+        'inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/60 transition-all hover:border-white/[0.15] hover:text-white hover:bg-white/[0.06]',
         className
       )}
       {...props}

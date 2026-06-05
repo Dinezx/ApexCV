@@ -1,7 +1,6 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['class'],
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
@@ -27,11 +26,8 @@ const config: Config = {
         },
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(59, 130, 246, 0.12), 0 20px 80px rgba(7, 11, 25, 0.5)',
-      },
-      backgroundImage: {
-        'mesh-dark':
-          'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1), transparent 25%), radial-gradient(circle at 80% 0%, rgba(96, 165, 250, 0.08), transparent 28%), radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.06), transparent 26%)',
+        glow: '0 0 0 1px rgba(99, 102, 241, 0.12), 0 20px 80px rgba(7, 11, 25, 0.5)',
+        'glow-sm': '0 0 20px rgba(99, 102, 241, 0.15)',
       },
       keyframes: {
         float: {
@@ -42,10 +38,15 @@ const config: Config = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.8' },
+        },
       },
       animation: {
         float: 'float 8s ease-in-out infinite',
         shimmer: 'shimmer 3s linear infinite',
+        'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
       },
     },
   },

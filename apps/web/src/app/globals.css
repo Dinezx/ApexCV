@@ -3,30 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --surface: #0a1128;
-  --surface-elevated: rgba(16, 28, 62, 0.75);
-  --surface-muted: rgba(23, 38, 80, 0.65);
-  --border: rgba(88, 180, 255, 0.15);
+  --surface: #030303;
+  --surface-elevated: rgba(255, 255, 255, 0.03);
+  --surface-muted: rgba(255, 255, 255, 0.02);
+  --border: rgba(255, 255, 255, 0.08);
   --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --accent: #3b82f6;
-  --accent-soft: rgba(59, 130, 246, 0.15);
-  --accent-2: #60a5fa;
+  --text-secondary: rgba(255, 255, 255, 0.4);
+  --text-tertiary: rgba(255, 255, 255, 0.25);
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.12);
+  --accent-2: #818cf8;
   --space-unit: 4px;
-}
-
-[data-theme='light'] {
-  --surface: #f8fafc;
-  --surface-elevated: rgba(255, 255, 255, 0.85);
-  --surface-muted: rgba(241, 245, 249, 0.95);
-  --border: rgba(15, 23, 42, 0.08);
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-tertiary: #64748b;
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.08);
-  --accent-2: #1d4ed8;
 }
 
 * {
@@ -40,19 +27,9 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% -8%, rgba(59, 130, 246, 0.22), transparent 32%),
-    radial-gradient(circle at 82% 8%, rgba(96, 165, 250, 0.12), transparent 26%),
-    linear-gradient(180deg, #060a17 0%, #0a1128 65%, #0e1736 100%);
+  background: #030303;
   color: var(--text-primary);
   font-family: var(--font-body);
-}
-
-[data-theme='light'] body {
-  background:
-    radial-gradient(circle at 16% -8%, rgba(37, 99, 235, 0.06), transparent 24%),
-    radial-gradient(circle at 82% 8%, rgba(96, 165, 250, 0.04), transparent 20%),
-    linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
 }
 
 a {
@@ -61,19 +38,23 @@ a {
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(99, 102, 241, 0.3);
 }
 
+/* Subtle ambient grid */
 .page-grid {
-  background-image: linear-gradient(rgba(151, 165, 184, 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(151, 165, 184, 0.12) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: radial-gradient(circle at 50% 18%, black, transparent 80%);
-  animation: drift-grid 24s linear infinite;
+  animation: drift-grid 28s linear infinite;
 }
 
+/* Glass morphism panels */
 .glass-panel {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(24px) saturate(120%);
 }
 
@@ -81,11 +62,12 @@ a {
   text-wrap: balance;
 }
 
+/* Story sections with elegant gradient overlays */
 .story-section {
   position: relative;
-  border: 1px solid var(--border);
-  border-radius: 34px;
-  background: linear-gradient(165deg, var(--surface-elevated), var(--surface-muted));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.02);
   overflow: hidden;
 }
 
@@ -93,18 +75,31 @@ a {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, transparent 0%, var(--accent-soft) 35%, transparent 70%);
+  background: linear-gradient(120deg, transparent 0%, rgba(99, 102, 241, 0.04) 35%, transparent 70%);
   pointer-events: none;
 }
 
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 @keyframes drift-grid {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(-12px, -8px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-12px, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
