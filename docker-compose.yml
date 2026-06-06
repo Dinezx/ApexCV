@@ -19,7 +19,7 @@ services:
     env_file:
       - ./apps/api/.env.example
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:Dinxz%40%4012345.@db.jmomybbdxhgobhtoqbka.supabase.co:5432/postgres
+      DATABASE_URL: postgresql+asyncpg://postgres:Dinxz%40%4012345.@db.jmomybbdxhgobhtoqbka.supabase.co:6543/postgres
       CORS_ORIGINS: '["http://localhost:3000","http://localhost:3001","http://localhost:3002","http://localhost:3003"]'
     depends_on:
       - db
