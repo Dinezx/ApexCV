@@ -16,6 +16,19 @@
   --space-unit: 4px;
 }
 
+html.light {
+  --surface: #f8fafc;
+  --surface-elevated: rgba(15, 23, 42, 0.04);
+  --surface-muted: rgba(15, 23, 42, 0.02);
+  --border: rgba(15, 23, 42, 0.08);
+  --text-primary: #0f172a;
+  --text-secondary: rgba(15, 23, 42, 0.6);
+  --text-tertiary: rgba(15, 23, 42, 0.35);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --accent-2: #3730a3;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -27,7 +40,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: #030303;
+  background: var(--surface);
   color: var(--text-primary);
   font-family: var(--font-body);
 }
@@ -102,4 +115,75 @@ a {
   0% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(-12px, -8px, 0); }
   100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Premium Light Mode Overrides */
+html.light, html.light body {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: var(--text-primary) !important;
+}
+
+/* Background overrides */
+html.light div.bg-\[\#030303\],
+html.light section.bg-\[\#030303\],
+html.light main.bg-\[\#030303\],
+html.light div.bg-\[\#070b19\] {
+  background-color: var(--surface) !important;
+}
+
+html.light aside,
+html.light header {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Text overrides */
+html.light .text-white {
+  color: var(--text-primary) !important;
+}
+html.light .text-white\/80 {
+  color: var(--text-primary) !important;
+}
+html.light .text-white\/60,
+html.light .text-white\/50 {
+  color: var(--text-secondary) !important;
+}
+html.light .text-white\/35,
+html.light .text-white\/25,
+html.light .text-white\/15,
+html.light .text-white\/10 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Card & panel backgrounds */
+html.light .bg-white\/\[0\.02\],
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.04\],
+html.light .bg-white\/5,
+html.light .bg-white\/10 {
+  background-color: var(--surface-elevated) !important;
+}
+
+/* Borders */
+html.light .border-white\/\[0\.04\],
+html.light .border-white\/\[0\.06\],
+html.light .border-white\/\[0\.08\],
+html.light .border-white\/10 {
+  border-color: var(--border) !important;
+}
+
+/* Specific elements adjustments */
+html.light .page-grid {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px) !important;
 }

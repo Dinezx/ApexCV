@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, AlertCircle, CheckCircle2, Circle, Sparkles } from 'lucide-react';
 import { authenticate } from '@/lib/api';
+import { ApexCVLogo } from '@/components/ui/logo';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -56,9 +57,7 @@ export default function SignupPage() {
 
         <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-8 sm:p-10 space-y-7 backdrop-blur-sm">
           <div className="space-y-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-display text-white text-sm font-bold shadow-lg shadow-indigo-500/20">
-              A
-            </div>
+            <ApexCVLogo iconOnly />
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.06]">
               <Sparkles className="h-3 w-3 text-violet-400/60" />
               <span className="text-[10px] text-white/40 tracking-wider uppercase">Create Account</span>

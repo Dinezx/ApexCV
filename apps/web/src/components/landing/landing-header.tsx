@@ -2,20 +2,20 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useThemeStore } from '@/store/theme-store';
+import { ApexCVLogo } from '@/components/ui/logo';
 
 export function LandingHeader() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { theme, toggleTheme } = useThemeStore();
 
   return (
     <header className="fixed top-0 z-50 w-full">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-display text-white text-sm font-bold shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
-            A
-          </div>
-          <span className="font-display text-lg font-semibold tracking-tight text-white">Resume AI</span>
+        <Link href="/" className="group">
+          <ApexCVLogo />
         </Link>
 
         {/* Desktop nav */}
@@ -32,6 +32,13 @@ export function LandingHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
           <Link
             href="/login"
             className="px-4 py-2 text-sm text-white/60 hover:text-white transition-colors"
@@ -75,7 +82,14 @@ export function LandingHeader() {
                 {item}
               </a>
             ))}
-            <div className="border-t border-white/[0.06] pt-3 flex gap-2">
+            <div className="border-t border-white/[0.06] pt-3 flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white/60 hover:text-white flex items-center justify-center"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
               <Link href="/login" className="flex-1 text-center py-2.5 text-sm text-white/60 rounded-xl border border-white/[0.08] hover:text-white transition-colors">
                 Sign in
               </Link>

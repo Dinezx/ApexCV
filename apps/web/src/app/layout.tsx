@@ -7,7 +7,7 @@ const bodyFont = Inter({ subsets: ['latin'], variable: '--font-body' });
 const displayFont = Space_Grotesk({ subsets: ['latin'], variable: '--font-display', weight: ['400', '500', '600', '700'] });
 
 export const metadata: Metadata = {
-  title: 'AI Resume Analyser — Transform Your Career',
+  title: 'ApexCV — AI Resume Analyser & ATS Optimizer',
   description: 'Premium AI resume analysis platform for ATS scoring, role matching, and recruiter-ready insights. Powered by intelligent parsing and coaching.',
 };
 

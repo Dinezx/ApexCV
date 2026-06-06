@@ -108,7 +108,7 @@ export default function DashboardPage() {
   const overview = overviewQuery.data;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#030303]">
+    <div className="min-h-screen flex flex-col lg:pl-64 bg-[#030303]">
       <SidebarNav />
 
       <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
@@ -208,6 +208,57 @@ export default function DashboardPage() {
 
                   <div className="pt-2">
                     <DropPanel onPick={(file) => uploadMutation.mutate(file)} />
+                  </div>
+                </div>
+              </Card>
+
+              {/* AI Optimization Insights Card */}
+              <Card className="p-6 sm:p-8 space-y-6">
+                <div>
+                  <Badge className="border-indigo-500/25 text-indigo-400 bg-indigo-500/5">Career Catalyst</Badge>
+                  <h2 className="mt-2 font-display text-xl font-bold tracking-tight text-text-primary">AI Optimization Insights</h2>
+                  <p className="text-xs text-text-secondary mt-1">Unlock your resume's full potential with these AI recommendations based on your current profile.</p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/[0.05] bg-surface-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-indigo-400">
+                      <Sparkles size={16} />
+                      <h4 className="text-sm font-semibold text-text-primary">Quantify Metrics</h4>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Resumes with quantified metrics (e.g., "Increased sales by 22%") secure 40% more interviews. Add metrics to your experience section.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.05] bg-surface-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <Layers size={16} />
+                      <h4 className="text-sm font-semibold text-text-primary">Tailor Keywords</h4>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Your current match average is 82%. Tailor skills to exact phrases in job descriptions to push it past the 90% threshold.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.05] bg-surface-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-blue-400">
+                      <FileText size={16} />
+                      <h4 className="text-sm font-semibold text-text-primary">Keep Formatting Simple</h4>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Avoid tables or text boxes inside your PDF. Simple single-column layouts parse 60% more accurately in ATS scanners.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.05] bg-surface-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-amber-400">
+                      <Award size={16} />
+                      <h4 className="text-sm font-semibold text-text-primary">Target Key Certifications</h4>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Highlight cloud architecture or frontend framework certifications at the top to attract automated recruiter filters.
+                    </p>
                   </div>
                 </div>
               </Card>

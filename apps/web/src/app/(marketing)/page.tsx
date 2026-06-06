@@ -19,6 +19,7 @@ import {
   Circle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { ApexCVLogo } from '@/components/ui/logo';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -427,11 +428,8 @@ export default function MarketingPage() {
       <footer className="border-t border-white/[0.04] py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-display text-white text-xs font-bold">
-                A
-              </div>
-              <span className="font-display font-semibold text-white/60 text-sm">Resume AI</span>
+            <div className="flex items-center">
+              <ApexCVLogo />
             </div>
             <nav className="flex items-center gap-6 text-xs text-white/25">
               <a href="#features" className="hover:text-white/50 transition-colors">Features</a>
@@ -439,7 +437,7 @@ export default function MarketingPage() {
               <Link href="/login" className="hover:text-white/50 transition-colors">Sign in</Link>
               <Link href="/signup" className="hover:text-white/50 transition-colors">Get Started</Link>
             </nav>
-            <p className="text-xs text-white/15">© 2026 Resume AI. All rights reserved.</p>
+            <p className="text-xs text-white/15">© 2026 ApexCV. All rights reserved.</p>
           </div>
         </div>
       </footer>

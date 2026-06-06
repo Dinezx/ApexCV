@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useThemeStore } from '@/store/theme-store';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(
@@ -15,6 +16,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  const { theme, hydrated } = useThemeStore();
+
+  React.useEffect(() => {
+    if (!hydrated) return;
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+  }, [theme, hydrated]);
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
