@@ -75,7 +75,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@example.com"
                 required
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors autofill:shadow-[0_0_0_1000px_#0c0c0e_inset] [-webkit-text-fill-color:white]"
               />
             </div>
             <div className="space-y-2">
@@ -86,12 +86,12 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   required
-                  className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-11 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
+                  className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-11 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors autofill:shadow-[0_0_0_1000px_#0c0c0e_inset] [-webkit-text-fill-color:white]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
