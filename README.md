@@ -1,250 +1,140 @@
-# AI Resume Analyzer SaaS
+# 🌌 ApexCV: AI Resume Analyser SaaS
 
-A production-grade, full-stack AI Resume Analyzer platform with a premium, cinematic UI and modular backend architecture.
+A production-grade, full-stack AI Resume Analyser platform built with a cinematic dark-mode UI, modular FastAPI backend, and robust Supabase/PostgreSQL schema.
 
-## Product Highlights
+---
 
-- Unique premium SaaS interface (asymmetric layouts, layered depth, animated grid, restrained motion)
-- Full authentication with JWT and protected API routes
-- Resume upload and parsing for PDF/DOCX
-- AI-assisted ATS analysis, missing keyword detection, role matching, suggestions, and skill gap insights
-- Dashboard analytics with trend chart, activity timeline, quick actions, command palette, and expandable AI panels
-- Resume comparison workflow
-- Export analysis as PDF
-- AI chat assistant for iterative resume improvement
-- Recruiter mode insight endpoint for shortlist confidence
+<p align="left">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=for-the-badge&logo=fastapi" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+</p>
 
-## Tech Stack
+- **🌐 Live Production Web App**: [https://apexcv-five.vercel.app](https://apexcv-five.vercel.app)
+- **⚡ Live Backend API**: [https://ai-resume-analyser-0b29.onrender.com](https://ai-resume-analyser-0b29.onrender.com)
 
-### Frontend
+---
 
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Zustand
-- React Query
+## 🔮 System Architecture
 
-### Backend
+The monorepo operates on a decoupled client-server architecture designed for lightning-fast parsing and highly structured database persistence.
 
-- FastAPI (async)
-- PostgreSQL
-- SQLAlchemy 2.x
-- Alembic
-- JWT authentication
+```mermaid
+graph TD
+    Client([Browser Client]) -->|HTTPS / WSS| Frontend[Vercel Frontend: Next.js 15]
+    Client -->|Protected Requests / CORS| Backend[Render Backend: FastAPI]
+    Frontend -->|Typed API Hook| Backend
+    Backend -->|Async Engine / Port 5432| Supabase[(Supabase DB: Transaction Pooler)]
+    Backend -->|Structured JSON Prompts| OpenAI[OpenAI API / Gemini]
+    
+    style Frontend fill:#0f0f11,stroke:#30363d,stroke-width:1px,color:#fff
+    style Backend fill:#0f0f11,stroke:#30363d,stroke-width:1px,color:#fff
+    style Supabase fill:#0c0f0a,stroke:#3ecf8e,stroke-width:2px,color:#3ecf8e
+    style OpenAI fill:#0f0e11,stroke:#10a37f,stroke-width:1px,color:#10a37f
+```
 
-### AI
+---
 
-- OpenAI API integration (with fallback behavior when key is missing)
+## ✨ Key Capabilities
 
-### Deployment
+| Domain | Highlight Feature | Engineering Detail |
+| :--- | :--- | :--- |
+| **🎨 User Experience** | **Cinematic dark interface** with glassmorphism, responsive dashboard grids, and smooth staggered animations. | Styled with Vanilla Tailwind CSS, managed with Zustand, animated with Framer Motion. |
+| **🤖 AI Parsing** | **ATS Score extraction**, missing keyword matching, and targeted bullet-point recommendations. | Utilizes OpenAI structured JSON outputs and clean fallbacks. |
+| **⚡ Database** | **Supabase Transaction Pooler** (port `5432`) integration. | Asyncpg connection tuning with disabled statement caching to avoid pooled duplicate statement conflicts. |
+| **🔒 Security** | **Robust CORS origin matching** and JWT token state propagation. | Custom validator parsed via Pydantic to cleanly bind local development and production Vercel domains. |
 
-- Docker + docker-compose
-- Nginx reverse proxy
-- GitHub Actions CI workflow
-- Frontend ready for Vercel deployment
-- Backend ready for Render/AWS deployment
+---
 
-## Monorepo Structure
+## 📂 Codebase Tour
 
 ```text
 .
-├── .github/
-│   └── workflows/
-│       └── ci.yml
 ├── apps/
-│   ├── api/
+│   ├── api/                     # 🐍 Python FastAPI Service
 │   │   ├── app/
-│   │   │   ├── api/
-│   │   │   │   ├── deps.py
-│   │   │   │   ├── router.py
-│   │   │   │   └── routes/
-│   │   │   │       ├── analysis.py
-│   │   │   │       ├── auth.py
-│   │   │   │       ├── chat.py
-│   │   │   │       ├── dashboard.py
-│   │   │   │       ├── profile.py
-│   │   │   │       └── resumes.py
-│   │   │   ├── core/
-│   │   │   ├── db/
-│   │   │   ├── middleware/
-│   │   │   ├── models/
-│   │   │   ├── schemas/
-│   │   │   ├── services/
-│   │   │   ├── utils/
-│   │   │   └── main.py
-│   │   ├── alembic/
-│   │   │   └── versions/
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   └── .env.example
-│   └── web/
+│   │   │   ├── api/             # Routers & endpoint definitions
+│   │   │   ├── core/            # Configuration & Pydantic settings
+│   │   │   ├── db/              # Database connection & pooling configuration
+│   │   │   ├── middleware/      # Rate-limiting & CORS filters
+│   │   │   └── models/          # SQLAlchemy async schemas
+│   │   ├── alembic/             # Database migration versions
+│   │   └── Dockerfile
+│   └── web/                     # ⚛️ Next.js 15 Web Application
 │       ├── src/
-│       │   ├── app/
-│       │   ├── components/
-│       │   ├── lib/
-│       │   └── store/
-│       ├── Dockerfile
-│       └── .env.example
-├── docker/
-│   └── nginx.conf
+│       │   ├── app/             # Page routing and UI layouts
+│       │   ├── components/      # UI components & design primitives
+│       │   └── lib/             # API clients & client hooks
+│       └── Dockerfile
 └── docker-compose.yml
 ```
 
-## Database Schema
+---
 
-Main tables:
+## 🛠️ Local Sandbox
 
-1. users
-2. resumes
-3. analysis_results
-4. subscriptions
-5. activity_logs
-
-Implemented through SQLAlchemy models and Alembic migration:
-
-- `apps/api/app/models/*.py`
-- `apps/api/alembic/versions/20260531_0001_initial.py`
-
-## API Endpoints
-
-Base: `/api/v1`
-
-### Auth
-
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
-
-### Resumes
-
-- `POST /resumes/upload`
-- `GET /resumes`
-- `POST /resumes/compare`
-
-### Analysis
-
-- `POST /analysis`
-- `GET /analysis/{resume_id}`
-- `GET /analysis/{analysis_id}/recruiter`
-- `GET /analysis/{resume_id}/export`
-
-### Dashboard
-
-- `GET /dashboard/overview`
-
-### Profile
-
-- `GET /profile`
-- `PATCH /profile`
-
-### AI Chat
-
-- `POST /chat`
-
-## Environment Variables
-
-### Backend (`apps/api/.env`)
-
-Use `apps/api/.env.example`:
-
-- `DATABASE_URL`
-- `JWT_SECRET`
-- `JWT_ALGORITHM`
-- `JWT_EXPIRE_MINUTES`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `CORS_ORIGINS`
-- `RATE_LIMIT_PER_MINUTE`
-- `MAX_UPLOAD_SIZE_MB`
-
-### Frontend (`apps/web/.env.local`)
-
-Use `apps/web/.env.example`:
-
-- `NEXT_PUBLIC_API_URL`
-
-## Local Development
-
-### Option 1: Docker Compose
+To spin up the entire stack (including local database, reverse proxy, frontend, and backend) instantly:
 
 ```bash
+# Clone and enter the workspace
+git clone https://github.com/Dinezx/AI-Resume-Analyser.git
+cd AI-Resume-Analyser
+
+# Launch the orchestrator
 docker compose up --build
 ```
 
-Services:
+- **Frontend**: http://localhost:3000
+- **FastAPI Sandbox**: http://localhost:8000/docs
+- **Nginx Entrypoint**: http://localhost:80
 
-- Web: http://localhost:3000
-- API: http://localhost:8000
-- Nginx entrypoint: http://localhost:80
-- Postgres: localhost:5432
+---
 
-### Option 2: Run Services Manually
+## 🧪 Bare Metal Manual Execution
 
-Backend:
-
+### 1. Spin up the FastAPI Backend
 ```bash
 cd apps/api
+
+# Create and boot the environment
 python -m venv .venv
-. .venv/Scripts/activate  # Windows PowerShell: .\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1   # Windows
+source .venv/bin/activate      # Unix
+
+# Install dependencies and update schema
 pip install -r requirements.txt
 alembic upgrade head
+
+# Run live reloading server
 uvicorn app.main:app --reload --port 8000
 ```
 
-Frontend:
-
+### 2. Boot up the Next.js Frontend
 ```bash
 cd apps/web
+
+# Install dependencies and launch dev server
 npm install
 npm run dev
 ```
 
-## Deployment Guide
+---
 
-### Frontend (Vercel)
+## 🚀 Cloud Deployment
 
-1. Import `apps/web` project in Vercel.
-2. Set `NEXT_PUBLIC_API_URL` to your backend URL.
-3. Build command: `npm run build`.
-4. Output is handled by Next.js.
+### Web Client (Vercel)
+1. Point Vercel to the `apps/web` directory.
+2. Provide the build command: `npm run build`.
+3. Set the environment variable `NEXT_PUBLIC_API_URL` targeting your production Render endpoint.
 
-### Backend (Render/AWS)
-
-1. Deploy `apps/api` as a Docker service.
-2. Set environment variables from `.env.example`.
-3. Ensure managed PostgreSQL is available.
-4. Run startup command in container:
-   - `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000`
-
-### Nginx
-
-- Reverse proxy config at `docker/nginx.conf`.
-- Proxies `/api/*` to FastAPI and `/` to Next.js.
-
-## Architecture Notes
-
-- Clean backend boundaries: routes -> schemas -> services -> models/utils
-- Async SQLAlchemy sessions for scalable API IO
-- Middleware layer for centralized rate limiting and error responses
-- Typed frontend API client with snake_case -> camelCase mapping
-- React Query for server state and optimistic dashboard refreshes
-- Zustand for UI state (theme + command palette)
-- Framer Motion for page reveal and staggered interaction patterns
-
-## CI/CD
-
-GitHub Actions workflow:
-
-- Frontend build check (`apps/web`)
-- Backend syntax compilation check (`apps/api`)
-
-See `.github/workflows/ci.yml`.
-
-## Future Enhancements
-
-- Stripe subscription webhooks and entitlement checks
-- Vector-based job matching and recruiter ranking
-- Multi-tenant organization workspaces
-- Audit trails and SIEM-friendly event forwarding
-- Full integration test suite with seeded fixtures
+### Backend Api (Render / AWS)
+1. Deploy `apps/api` using the included `Dockerfile`.
+2. Configure the following environment variables:
+   - `DATABASE_URL`: Your Supabase async transaction pooler string.
+   - `CORS_ORIGINS`: JSON string of allowed client URLs.
+3. Configure the container start-up commands to apply migrations:
+   ```bash
+   alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+   ```
