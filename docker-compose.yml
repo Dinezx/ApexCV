@@ -20,7 +20,7 @@ services:
       - ./apps/api/.env.example
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres.jmomybbdxhgobhtoqbka:Dinxz%40%4012345.@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres
-      CORS_ORIGINS: '["http://localhost:3000","http://localhost:3001","http://localhost:3002","http://localhost:3003","https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app","https://apexcv-git-main-dinezxs-projects.vercel.app"]'
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:3001","http://localhost:3002","http://localhost:3003","https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app","https://apexcv-git-main-dinezxs-projects.vercel.app","https://apexcv-five.vercel.app"]'
     depends_on:
       - db
     ports:

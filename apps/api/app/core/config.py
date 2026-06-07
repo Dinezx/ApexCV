@@ -22,6 +22,7 @@ class Settings(BaseSettings):
             "http://localhost:3000",
             "https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app",
             "https://apexcv-git-main-dinezxs-projects.vercel.app",
+            "https://apexcv-five.vercel.app",
         ],
         alias="CORS_ORIGINS",
     )
@@ -48,11 +49,17 @@ class Settings(BaseSettings):
         else:
             origins = ["http://localhost:3000"]
 
+        # Normalize trailing slashes
+        origins = [orig.rstrip("/") for orig in origins]
+
         # Always ensure Vercel production and preview domains are allowed
         vercel_origins = [
             "https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app",
             "https://apexcv-git-main-dinezxs-projects.vercel.app",
+            "https://apexcv-five.vercel.app",
         ]
+        vercel_origins = [orig.rstrip("/") for orig in vercel_origins]
+        
         for origin in vercel_origins:
             if origin not in origins:
                 origins.append(origin)
