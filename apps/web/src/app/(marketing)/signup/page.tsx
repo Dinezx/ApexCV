@@ -4,7 +4,7 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, AlertCircle, CheckCircle2, Circle, Sparkles } from 'lucide-react';
+import { ArrowLeft, AlertCircle, CheckCircle2, Circle, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { authenticate } from '@/lib/api';
 import { ApexCVLogo } from '@/components/ui/logo';
 
@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [pending, setPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -90,13 +91,22 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium text-white/40">Password</label>
-              <input
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
-              />
+              <div className="relative">
+                <input
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  required
+                  className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-4 pr-11 text-sm text-white placeholder:text-white/20 focus:border-indigo-500/40 focus:outline-none transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
             <button
               type="submit"
