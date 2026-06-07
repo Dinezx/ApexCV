@@ -30,18 +30,33 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: any) -> list[str]:
+        origins = []
         if isinstance(v, str):
             import json
             try:
                 # Try to parse as JSON list first
                 parsed = json.loads(v)
                 if isinstance(parsed, list):
-                    return parsed
+                    origins = parsed
             except Exception:
                 pass
-            # Fallback to comma-separated list
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+            if not origins:
+                # Fallback to comma-separated list
+                origins = [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, list):
+            origins = v
+        else:
+            origins = ["http://localhost:3000"]
+
+        # Always ensure Vercel production and preview domains are allowed
+        vercel_origins = [
+            "https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app",
+            "https://apexcv-git-main-dinezxs-projects.vercel.app",
+        ]
+        for origin in vercel_origins:
+            if origin not in origins:
+                origins.append(origin)
+        return origins
 
 
 @lru_cache
