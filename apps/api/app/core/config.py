@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 # pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,8 +17,31 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4.1-mini", alias="OPENAI_MODEL")
     max_upload_size_mb: int = Field(default=8, alias="MAX_UPLOAD_SIZE_MB")
-    cors_origins: list[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
+    cors_origins: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "https://apexcv-1ch97m0cc-dinezxs-projects.vercel.app",
+            "https://apexcv-git-main-dinezxs-projects.vercel.app",
+        ],
+        alias="CORS_ORIGINS",
+    )
     rate_limit_per_minute: int = Field(default=80, alias="RATE_LIMIT_PER_MINUTE")
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: any) -> list[str]:
+        if isinstance(v, str):
+            import json
+            try:
+                # Try to parse as JSON list first
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+            # Fallback to comma-separated list
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
 
 @lru_cache
